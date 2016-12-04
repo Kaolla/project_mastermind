@@ -15,7 +15,11 @@ class Game
 	end
 
 	def random_combination
-		@random =  (1..8).to_a.shuffle[1..4]
+		(1..8).to_a.shuffle[1..4]
+	end
+
+	def random_num
+		rand(1..8)
 	end
 
 	def start
@@ -24,48 +28,57 @@ class Game
 		@board.display_grid
 		turn
 	end
+
+	def role
+		puts "You are guesser by default, do you want to play master instead? y/n"
+		answer = gets.chomp.to_s
+		puts "\n"
+		if answer == "y"
+			@guesser, @master = @master, @guesser 
+			@master.choose_combination
+		end
+	end
 	
 	def turn
 		until @winner do
-			@guess = @guesser.bot ? auto_guess : @guesser.try_guess
+			@guess = @guesser.bot ? auto_guess : manual_guess
 			grid_update
 			@board.display_grid
-			check_auto_guess
+			check_guess
 			@@turn += 1
 			win?
 		end
 	end
 
-	def role
-		puts "You are guesser by default, do you want to play master instead? y/n"
-		@answer = gets.chomp.to_s
-		puts "\n"
-		if @answer == "y"
-			@guesser, @master = @master, @guesser 
-			@master.choose_combination
+	def manual_guess
+		puts "============================="
+		puts "Try to guess the combination!"
+		gets.chomp.to_s.split('').map { |x| x.to_i }
+	end
+
+	def auto_guess
+		auto_guess = @presence ? @presence : random_combination
+		while auto_guess.length < 4
+			auto_guess << random_num unless auto_guess.include? random_num
+			auto_guess.uniq!
 		end
+		auto_guess.shuffle
+	end
+
+	def check_guess
+		@presence = @guess.select { |x| @master.combination.include? x }
+		@sorted 	= @guess.select.with_index { |x, i| x == @master.combination[i] }
+
+		puts "Present: #{@presence.length}"
+		puts "Sorted:  #{@sorted.length}"
+		puts "\n"
 	end
 
 	def grid_update
 		@board.grid[@@turn] = @guess
 	end
 
-	def check_auto_guess
-		@presence = @guess.select { |x| @master.combination.include? x }
-		@sorted 	= @guess.select.with_index do |x, i|
-									@guess[i] == @master.combination[i]
-								end
-		puts "Present: #{@presence.length}"
-		puts "Sorted:  #{@sorted.length}"
-		puts "\n"
-	end
-
-	def auto_guess
-		(1..8).to_a.shuffle[1..4]
-		# @auto_guess = []
-		# @presence ? @auto_guess << @presence : @auto_guess = (1..8).to_a.shuffle[1..4]
-		# @auto_guess << rand(1..8) until @auto_guess.length == 4
-	end
+	private
 
 	def win?
 		if @guess == @master.combination

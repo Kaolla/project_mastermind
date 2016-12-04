@@ -20,4 +20,5 @@ class Player
 		puts "Your combination is #{@combination}."
 		puts "\n"
 	end
+
 end
