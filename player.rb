@@ -15,7 +15,7 @@ class Player
 	end
 
 	def choose_combination
-		puts "Choose your combination."
+		puts "Choose your combination, four numbers between 1 and 8."
 		@combination = gets.chomp.to_s.split('').map { |x| x.to_i }
 		puts "Your combination is #{@combination}."
 		puts "\n"

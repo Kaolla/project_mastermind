@@ -24,12 +24,12 @@ class Game
 
 	def start
 		@player1.choose_name
-		role
+		set_role
 		@board.display_grid
-		turn
+		turn until @winner
 	end
 
-	def role
+	def set_role
 		puts "You are guesser by default, do you want to play master instead? y/n"
 		answer = gets.chomp.to_s
 		puts "\n"
@@ -40,29 +40,27 @@ class Game
 	end
 	
 	def turn
-		until @winner do
-			@guess = @guesser.bot ? auto_guess : manual_guess
-			grid_update
-			@board.display_grid
-			check_guess
-			@@turn += 1
-			win?
-		end
+		@guess = guess
+		grid_update
+		@board.display_grid
+		check_guess
+		@@turn += 1
+		win?
 	end
 
-	def manual_guess
-		puts "============================="
-		puts "Try to guess the combination!"
-		gets.chomp.to_s.split('').map { |x| x.to_i }
-	end
-
-	def auto_guess
-		auto_guess = @presence ? @presence : random_combination
-		while auto_guess.length < 4
-			auto_guess << random_num unless auto_guess.include? random_num
-			auto_guess.uniq!
+	def guess
+		if @guesser.bot
+			auto_guess = @presence ? @presence : random_combination
+			while auto_guess.length < 4
+				auto_guess << random_num unless auto_guess.include? random_num
+				auto_guess.uniq!
+			end
+			auto_guess.shuffle
+		else
+			puts "============================="
+			puts "Try to guess the combination, four numbers between 1 and 8!"
+			gets.chomp.to_s.split('').map { |x| x.to_i }
 		end
-		auto_guess.shuffle
 	end
 
 	def check_guess
